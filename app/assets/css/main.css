@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+.font-battambang {
+    font-family: 'Battambang', sans-serif;
+}
