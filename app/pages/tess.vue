@@ -92,7 +92,7 @@ const handleTreeClick = (item: any) => {
   }
 }
 
-definePageMeta({ middleware: 'auth' })
+
 const colorMode = useColorMode()
 if (!colorMode.preference) colorMode.preference = 'dark'
 const links = ref([
