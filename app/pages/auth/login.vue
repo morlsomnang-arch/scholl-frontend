@@ -22,7 +22,19 @@ const fields: AuthFormField[] = [
   { name: 'email', type: 'email', label: 'Email', required: true },
   { name: 'password', type: 'password', label: 'Password', required: true }
 ]
-
+const providers = [{
+  label: 'Google',
+  icon: 'i-simple-icons-google',
+  onClick: () => {
+    toast.add({ title: 'Google', description: 'Login with Google' })
+  }
+}, {
+  label: 'GitHub',
+  icon: 'i-simple-icons-github',
+  onClick: () => {
+    toast.add({ title: 'GitHub', description: 'Login with GitHub' })
+  }
+}]
 const schema = z.object({
   email: z.string().email('Email មិនត្រឹមត្រូវ'),
   password: z.string().min(8, 'Password ត្រូវមានយ៉ាងហោចណាស់ 8 អក្សរ')
@@ -55,13 +67,10 @@ async function onSubmit(e: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <UPageCard class="w-full max-w-md">
-    <UAuthForm
-      title="Login"
-      submit-label="Login"
-      :schema="schema"
-      :fields="fields"
-      @submit="onSubmit"
-    />
-  </UPageCard>
+  <div class="flex flex-col items-center justify-center gap-4 p-4 pt-5 text-center">
+    <UPageCard class="w-full max-w-md">
+      <UAuthForm :schema="schema" title="Login" description="Enter your credentials to access your account."
+        icon="i-lucide-user" :fields="fields" :providers="providers" @submit="onSubmit" />
+    </UPageCard>
+  </div>
 </template>

@@ -14,6 +14,11 @@ const UInput = resolveComponent('UInput')
 const toast = useToast()
 const { copy } = useClipboard()
 
+// Page Meta
+definePageMeta({
+  layout: 'admin',
+  middleware: 'auth'
+})
 
 // ប្រភេទទិន្នន័យ
 type Payment = {
