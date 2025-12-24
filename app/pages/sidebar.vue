@@ -106,9 +106,7 @@ import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Home, User, Users, Settings, X, ChevronRight } from 'lucide-vue-next'
 import { useColorMode } from '#imports'
-definePageMeta({
-  middleware: 'auth'
-})
+
 // Dark mode by default
 const colorMode = useColorMode()
 if (!colorMode.preference) colorMode.preference = 'dark'
