@@ -2,19 +2,23 @@
 import { h, resolveComponent, ref, computed, onMounted } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import { useStudent, type Student } from '~/composables/useStudent'
+import { useAuth } from '~/composables/useAuth'
 
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UInput = resolveComponent('UInput')
 const UModal = resolveComponent('UModal')
 
-definePageMeta({
-  layout: 'admin',
-  middleware: 'auth'
-})
+definePageMeta({ layout: 'admin', middleware: 'auth' })
 
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
+
+const { user, hasPermission } = useAuth()
+
+const canCreate = computed(() => hasPermission('create_students'))
+const canEdit = computed(() => hasPermission('update_students'))
+const canDelete = computed(() => hasPermission('delete_students'))
 
 const { getStudents, createStudent, updateStudent, deleteStudent } = useStudent()
 
@@ -50,7 +54,6 @@ const filteredData = computed(() => {
   )
 })
 
-/* ===== File ===== */
 const onFileChange = (e: Event) => {
   const files = (e.target as HTMLInputElement).files
   image.value = files && files.length ? files[0] : null
@@ -84,8 +87,6 @@ const submitForm = async () => {
   await fetchStudents()
   resetForm()
 }
-
-/* ===== Edit ===== */
 const editStudent = (s: Student) => {
   isEdit.value = true
   currentId.value = s.id
@@ -94,18 +95,14 @@ const editStudent = (s: Student) => {
   phone.value = s.phone
   showModal.value = true
 }
-
-/* ===== Delete ===== */
 const removeStudent = async (id: number) => {
   if (confirm('តើអ្នកពិតជាចង់លុបសិស្សនេះមែនទេ?')) {
     await deleteStudent(id)
     await fetchStudents()
   }
 }
-
-/* ===== Columns ===== */
 const columns: TableColumn<Student>[] = [
-  { accessorKey: 'id', header: '#', cell: ({ row }) => row.index + 1 },
+  { accessorKey: 'id', header: '#' },
   {
     id: 'image',
     header: 'រូបភាព',
@@ -116,48 +113,43 @@ const columns: TableColumn<Student>[] = [
           class: 'w-10 h-10 rounded object-cover mx-auto'
         })
         : '-'
-  },
+  }
+  ,
   { accessorKey: 'name', header: 'ឈ្មោះ' },
   { accessorKey: 'age', header: 'អាយុ' },
   { accessorKey: 'phone', header: 'ទូរស័ព្ទ' },
   {
     id: 'actions',
     header: 'សកម្មភាព',
-    cell: ({ row }) =>
-      h(
+    cell: ({ row }) => {
+      const items: any[] = []
+      if (canEdit.value) items.push({ label: 'កែប្រែ', onSelect: () => editStudent(row.original) })
+      if (canDelete.value) items.push({ label: 'លុប', onSelect: () => removeStudent(row.original.id) })
+
+      if (!items.length) return '-'
+
+      return h(
         UDropdownMenu,
-        {
-          content: { align: 'end' },
-          items: [
-            { label: 'កែប្រែ', onSelect: () => editStudent(row.original) },
-            { label: 'លុប', onSelect: () => removeStudent(row.original.id) }
-          ]
-        },
-        () =>
-          h(UButton, {
-            icon: 'i-lucide-ellipsis-vertical',
-            variant: 'ghost',
-            color: 'neutral'
-          })
+        { content: { align: 'end' }, items },
+        () => h(UButton, { icon: 'i-lucide-ellipsis-vertical', variant: 'ghost', color: 'neutral' })
       )
+    }
   }
 ]
 </script>
+
 <template>
   <div class="flex flex-col gap-4 font-battambang">
-
-    <!-- ===== Search + Action ===== -->
+    <!-- Search + Action -->
     <div class="flex items-center justify-between gap-3">
       <UInput v-model="searchQuery" icon="i-heroicons-magnifying-glass" placeholder="ស្វែងរកឈ្មោះ ឬ ទូរស័ព្ទ..."
         class="max-w-xs" />
-
-      <UButton color="primary" @click="showModal = true">
+      <UButton v-if="canCreate" color="primary" @click="showModal = true">
         ➕ បង្កើតសិស្សថ្មី
       </UButton>
-
     </div>
 
-    <!-- ===== Table ===== -->
+    <!-- Table -->
     <UTable sticky :data="filteredData" :columns="columns"
       class="max-h-140 overflow-auto border border-gray-300 dark:border-slate-700" :ui="{
         thead: 'sticky top-0 bg-gray-100 dark:bg-slate-800 z-10 text-center',
@@ -166,11 +158,10 @@ const columns: TableColumn<Student>[] = [
         tr: 'odd:bg-gray-50 even:bg-white dark:odd:bg-slate-900 dark:even:bg-slate-950 hover:bg-primary/5'
       }" />
 
+    <!-- Modal -->
     <UModal v-model:open="showModal">
       <template #header>
-        <h3 class="text-lg font-semibold font-battambang">
-          {{ isEdit ? 'កែប្រែសិស្ស' : 'បង្កើតសិស្សថ្មី' }}
-        </h3>
+        <h3 class="text-lg font-semibold font-battambang">{{ isEdit ? 'កែប្រែសិស្ស' : 'បង្កើតសិស្សថ្មី' }}</h3>
       </template>
 
       <template #body>
@@ -184,17 +175,10 @@ const columns: TableColumn<Student>[] = [
 
       <template #footer>
         <div class="flex justify-end gap-2">
-          <UButton color="gray" variant="soft" @click="resetForm">
-            បោះបង់
-          </UButton>
-
-          <UButton color="success" @click="submitForm">
-            {{ isEdit ? 'កែប្រែ' : 'រក្សាទុក' }}
-          </UButton>
+          <UButton color="gray" variant="soft" @click="resetForm">បោះបង់</UButton>
+          <UButton color="success" @click="submitForm">{{ isEdit ? 'កែប្រែ' : 'រក្សាទុក' }}</UButton>
         </div>
       </template>
     </UModal>
-
-
   </div>
 </template>

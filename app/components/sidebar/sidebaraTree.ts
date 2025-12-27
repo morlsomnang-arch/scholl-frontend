@@ -1,19 +1,17 @@
-
 export const treeItems = [
-   {
+  {
     key: 'student',
     label: 'សិស្ស',
     kbd: 'E',
     children: [
-      { key: 'staff-log', label: 'សិស្សទូទៅ', kbd: 'L', to: '/students' },
-      { key: 'staff-reason', label: 'សេវាកម្មសិស្ស', kbd: 'H', to: '/staff/log/reason' }
+      { key: 'student-general', label: 'សិស្សទូទៅ', kbd: 'L', to: '/students' },
+      { key: 'student-service', label: 'សេវាកម្មសិស្ស', kbd: 'H', to: '/staff/log/reason' }
     ]
   },
   {
     key: 'student-management',
     label: 'គ្រប់គ្រងសិស្ស',
     kbd: 'M',
-    icon: 'i-heroicons-academic-cap',
     children: [
       { key: 'student-log', label: 'កំណត់ហេតុសិស្ស', kbd: 'L', to: '/students/log' },
       { key: 'student-reason', label: 'ហេតុផល', kbd: 'P', to: '/students/log/reason' }
@@ -24,17 +22,17 @@ export const treeItems = [
     label: 'បុគ្គលិក',
     kbd: 'E',
     children: [
-      { key: 'staff-log', label: 'កំណត់ហេតុ', kbd: 'L', to: '/staff/log' },
-      { key: 'staff-reason', label: 'ហេតុផល', kbd: 'H', to: '/staff/log/reason' }
+      { key: 'staff-log', label: 'កំណត់ហេតុ', kbd: 'L', to: '/employee' },
+      { key: 'staff-reason', label: 'របាយការណ៏', kbd: 'H', to: '/employee/report' }
     ]
   },
   {
     key: 'cms',
-    label: 'CMS',
+    label: 'មុខងារ',
     kbd: 'C',
     children: [
-      { key: 'cms-data', label: 'ទិន្នន័យ', kbd: 'L', to: '/cms/data' },
-      { key: 'cms-report', label: 'ការបូកសរុប', kbd: 'H', to: '/cms/report' }
+      { key: 'cms-user', label: 'អ្នកប្រើប្រាស់', kbd: 'L', to: '/users' },
+      { key: 'cms-report', label: 'កំណត់សិទ្ធអ្នកប្រើប្រាស់', kbd: 'H', to: '/cms/report' }
     ]
   },
   {
@@ -44,6 +42,15 @@ export const treeItems = [
     children: [
       { key: 'home-data', label: 'ទិន្នន័យ', kbd: 'L', to: '/cms' },
       { key: 'home-summary', label: 'ការបូកសរុប', kbd: 'H', to: '/' }
+    ]
+  },
+  {
+    key: 'score',
+    label: 'ពិន្ទុសិស្ស',
+    kbd: 'H',
+    children: [
+      { key: 'score-data', label: 'ពិន្ទុ', kbd: 'L', to: '/scroe' },
+      { key: 'score-summary', label: 'ការបូកសរុប', kbd: 'H', to: '/' }
     ]
   }
 ]

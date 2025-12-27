@@ -1,53 +1,50 @@
 import { ref } from 'vue'
-import { useRuntimeConfig } from '#app'
+import { useRuntimeConfig } from '#imports'
+import axios from 'axios'
+import { useAuth } from '~/composables/useAuth'
 
+export type Student = {
+  id: number
+  name: string
+  age: number
+  phone: string
+  image?: string
+}
 
 export const useStudent = () => {
+  const students = ref<Student[]>([])
   const config = useRuntimeConfig()
   const apiBase = config.public.apiBase
+  const { token } = useAuth()
+  const axiosInstance = axios.create({
+    baseURL: apiBase,
+    headers: {
+      Authorization: `Bearer ${token.value}`
+    }
+  })
 
-  const getStudents = async (): Promise<Student[]> => {
+  const getStudents = async () => {
     try {
-      const res = await $fetch<Student[]>(`${apiBase}/students`, {
-        headers: { 'Content-Type': 'application/json' }
-      })
-      return res
+      const res = await axiosInstance.get('/students')
+      students.value = res.data
+      return students.value
     } catch (err) {
-      console.error('getStudents error:', err)
+      console.error(err)
       return []
     }
   }
 
   const createStudent = async (form: FormData) => {
-    try {
-      await $fetch(`${apiBase}/students`, {
-        method: 'POST',
-        body: form
-      })
-    } catch (err) {
-      console.error('createStudent error:', err)
-    }
+    await axiosInstance.post('/students', form)
   }
 
   const updateStudent = async (id: number, form: FormData) => {
-    try {
-      await $fetch(`${apiBase}/students/${id}`, {
-        method: 'PUT',
-        body: form
-      })
-    } catch (err) {
-      console.error('updateStudent error:', err)
-    }
+    await axiosInstance.put(`/students/${id}`, form)
   }
 
   const deleteStudent = async (id: number) => {
-    try {
-      await $fetch(`${apiBase}/students/${id}`, {
-        method: 'DELETE'
-      })
-    } catch (err) {
-      console.error('deleteStudent error:', err)
-    }
+    await axiosInstance.delete(`/students/${id}`)
   }
-  return { getStudents, createStudent, updateStudent, deleteStudent }
+
+  return { students, getStudents, createStudent, updateStudent, deleteStudent }
 }

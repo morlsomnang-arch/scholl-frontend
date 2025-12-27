@@ -167,12 +167,11 @@ function getRowItems(row: Row<Payment>) {
       sticky
       :data="filteredData"
       :columns="columns"
-      class="flex-1 overflow-auto border border-gray-300 dark:border-slate-700 font-battambang"
+      class="flex-1 overflow-auto borderfont-battambang"
       :ui="{
-        thead: 'sticky top-0 bg-gray-100 dark:bg-slate-800 z-10 font-battambang',
-        th: 'px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 dark:border-slate-700 font-battambang',
-        td: 'px-4 py-3 text-sm border border-gray-200 dark:border-slate-700 font-battambang',
-        tr: 'odd:bg-gray-50 even:bg-white dark:odd:bg-slate-900 dark:even:bg-slate-950 hover:bg-primary/5 font-battambang'
+        thead: 'sticky top-0  font-battambang',
+        th: 'px-4 py-3 text-left text-sm font-semibold  font-battambang',
+        td: 'px-4 py-3 text-sm border  font-battambang',
       }"
     />
   </div>
