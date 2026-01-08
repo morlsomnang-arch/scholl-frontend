@@ -1,7 +1,7 @@
 <template>
   <div :class="`flex min-h-screen ${modeClasses}`">
     <!-- Main Sidebar -->
-    <aside :class="`w-22 border-r flex flex-col ${sidebarClasses}`">
+    <aside :class="`w-22 border-r  flex flex-col ${sidebarClasses}`">
       <div :class="`h-18 flex items-center px-5 font-bold text-lg border-b ${borderClass}`">
         <img src="/pks.png" class="w-18 bg-red" />
       </div>
@@ -9,10 +9,8 @@
       <nav class="flex-1 py-4 ">
         <div v-for="link in filteredLinks" :key="link.label">
           <div
-            class="px-4 py-3 border-b hover:bg-gray-200 dark:hover:bg-slate-800 flex flex-col items-center cursor-pointer"
-            :class="linkClasses"
-            @click="toggleSubSidebar(link.label)"
-          >
+            class="px-4 py-3 border-b  dark:border-slate-700 hover:bg-gray-200 dark:hover:bg-slate-800 flex flex-col items-center cursor-pointer"
+            :class="linkClasses" @click="toggleSubSidebar(link.label)">
             <component :is="link.icon" class="w-4 h-5 mb-1" />
             <span class="text-sm text-center font-battambang">{{ link.label }}</span>
           </div>
@@ -36,14 +34,14 @@
               <UAvatar src="/nang.jpg" />
             </button>
 
-            <div
-              v-if="showMenu"
-              class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50"
-            >
-              <button @click="goToAccount" class="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700">
+            <div v-if="showMenu"
+              class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50">
+              <button @click="goToAccount"
+                class="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700">
                 Account
               </button>
-              <button @click="handleLogout" class="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700">
+              <button @click="handleLogout"
+                class="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700">
                 Logout
               </button>
             </div>
@@ -54,10 +52,7 @@
       <!-- Main -->
       <main class="flex-1 flex overflow-hidden">
         <!-- Sub Sidebar -->
-        <aside
-          v-if="showSubSidebar"
-          :class="`w-64 border-r p-3 ${subSidebarClasses} ${subSidebarBorder}`"
-        >
+        <aside v-if="showSubSidebar" :class="`w-64 border-r p-3 ${subSidebarClasses} ${subSidebarBorder}`">
           <div class="flex items-center justify-between mb-3">
             <span class="font-battambang font-semibold">{{ activeSidebar }}</span>
             <UButton size="xs" variant="ghost" @click="closeSubSidebar">
@@ -66,22 +61,16 @@
           </div>
 
           <!-- ⭐ UTree -->
-          <UTree
-            :items="filteredTreeItems
-              .filter(i => i.label === activeSidebar)
-              .map(i => ({
-                ...i,
-                children: i.children?.map(c => ({
-                  ...c
-                }))
-              }))"
-            class="font-battambang "
-          >
+          <UTree :items="filteredTreeItems
+            .filter(i => i.label === activeSidebar)
+            .map(i => ({
+              ...i,
+              children: i.children?.map(c => ({
+                ...c
+              }))
+            }))" class="font-battambang ">
             <template #item="{ item }">
-              <div
-                class="flex items-center gap-2 cursor-pointer hover:text-primary "
-                @click="handleTreeClick(item)"
-              >
+              <div class="flex items-center gap-2 cursor-pointer hover:text-primary " @click="handleTreeClick(item)">
                 <UKbd v-if="item.kbd" :value="item.kbd" size="sm" />
                 <span>{{ item.label }}</span>
               </div>
@@ -90,18 +79,12 @@
         </aside>
 
         <!-- Content -->
-        <div class="flex-1 p-4 overflow-auto">
-          <UButton
-            v-if="!showSubSidebar"
-            size="sm"
-            variant="ghost"
-            class="mb-3"
-            @click="showSubSidebar = true"
-          >
+        <div class="flex-1  overflow-auto">
+          <UButton v-if="!showSubSidebar" size="sm" variant="ghost" class="mb-3" @click="showSubSidebar = true">
             <ChevronRight class="w-5 h-5" />
           </UButton>
 
-          <div class="p-6">
+          <div class="">
             <slot />
           </div>
         </div>
@@ -143,6 +126,7 @@ const links = ref([
   { label: 'ទំព័រដើម', icon: Home, roles: ['super', 'employee', 'guest'] },
   { label: 'សិស្ស', icon: User, roles: ['super', 'employee'] },
   { label: 'ពិន្ទុសិស្ស', icon: User, roles: ['super', 'employee'] },
+  { label: 'ឪពុកម្ដាយ', icon: User, roles: ['super', 'employee'] },
   { label: 'បុគ្គលិក', icon: Users, roles: ['super', 'employee'] },
   { label: 'មុខងារ', icon: Settings, roles: ['super'] },
 ])

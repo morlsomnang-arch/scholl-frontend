@@ -4,8 +4,6 @@ import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui'
 import { useAuth } from '~/composables/useAuth'
 import { navigateTo } from '#imports'
 
-
-
 const toast = useToast()
 onMounted(() => {
   toast.add({
@@ -19,7 +17,7 @@ onMounted(() => {
 const { login } = useAuth()
 
 const fields: AuthFormField[] = [
-  { name: 'email', type: 'email', label: 'Email', required: true },
+  { name: 'email', type: 'email', label: 'អ៊ីម៉ែល', required: true },
   { name: 'password', type: 'password', label: 'Password', required: true }
 ]
 const providers = [{
@@ -67,9 +65,9 @@ async function onSubmit(e: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center gap-4 p-4 pt-5 text-center">
+  <div class="flex flex-col items-center justify-center gap-4 p-4 pt-5 text-center font-battambang">
     <UPageCard class="w-full max-w-md">
-      <UAuthForm :schema="schema" title="Login" description="Enter your credentials to access your account."
+      <UAuthForm :schema="schema" title="Login" description="សូមធ្វើការបញ្ចូលលេខសម្ងាត់ និងអ៊ីម៉ែល"
         icon="i-lucide-user" :fields="fields" :providers="providers" @submit="onSubmit" />
     </UPageCard>
   </div>

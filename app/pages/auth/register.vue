@@ -40,7 +40,7 @@ async function onSubmit(e: FormSubmitEvent<Schema>) {
 
     toast.add({
       title: 'ជោគជ័យ',
-      description: 'បានបង្កើតគណនីដោយជោគជ័យ 🎉',
+      description: 'បានបង្កើតគណនីដោយជោគជ័យ ',
       color: 'success'
     })
 
