@@ -5,9 +5,11 @@ export const treeItems = [
     kbd: 'E',
     children: [
       { key: 'student-general', label: 'សិស្សទូទៅ', kbd: 'L', to: '/students' },
-      { key: 'student-service', label: 'សេវាកម្មសិស្ស', kbd: 'H', to: '/services/services' }
+      { key: 'student-service', label: 'សេវាកម្មសិស្ស', kbd: 'H', to: '/services/services' },
+       { key: 'student-address', label: 'អាណព្យាបាលលសិស្ស', kbd: 'H', to: '/students/StudenntAddress' }
     ]
   },
+  // students/StudenntAddress
   {
     key: 'parent',
     label: 'ឪពុកម្ដាយ',
@@ -41,7 +43,7 @@ export const treeItems = [
     kbd: 'C',
     // users/Role
     children: [
-      { key: 'cms-user', label: 'អ្នកប្រើប្រាស់', kbd: 'L', to: '/users' },
+      { key: 'cms-user', label: 'អ្នកប្រើប្រាស់', kbd: 'L', to: '/users' ,roles: ['super']},
       { key: 'cms-user', label: 'កំណត់សិទ្ធអ្នកប្រើ', kbd: 'R', to: '/users/Role' },
       { key: 'cms-report', label: 'ថ្នាក់រៀន', kbd: 'H', to: '/class' },
       { key: 'type_class', label: 'ប្រភេទថ្នាក់', kbd: 'k', to: '/class/classtypes' },

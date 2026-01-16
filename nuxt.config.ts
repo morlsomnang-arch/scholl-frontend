@@ -22,7 +22,11 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/ts.svg' },
         { rel: 'icon', type: 'image/png', href: '/ts.svg' },
-        { rel: 'apple-touch-icon', href: '/ts.svg' }
+        { rel: 'apple-touch-icon', href: '/ts.svg' },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap'
+        }
       ]
     }
   }

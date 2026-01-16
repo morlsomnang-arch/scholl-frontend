@@ -5,7 +5,7 @@ export interface ClassTypeItem {
   id: number
   name: string
 }
-export interface ClassType {    // <-- add this
+export interface ClassType {    
   id: number
   name: string
 }

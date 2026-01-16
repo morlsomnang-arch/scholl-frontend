@@ -1,8 +1,53 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
-.font-battambang {
-    font-family: 'Battambang', sans-serif;
+
+body {
+  font-family: 'Battambang', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
-.USelect{
-     font-family: 'Battambang', sans-serif;
+.main-data{
+    @apply max-h-115 overflow-auto border dark:border-slate-700
 }
+table{
+    @apply w-200 border-collapse border  dark:border-slate-700
+}
+thead{
+    @apply dark:bg-slate-700 sticky top-0 z-10
+}
+td {
+  @apply text-slate-700 dark:text-slate-400;
+  @apply border dark:border-slate-700 px-2 py-1
+}
+th{
+    @apply border dark:border-slate-700 
+
+}
+
+
+
+
+
+/* Group row */
+table tbody tr.group-row {
+  @apply font-semibold;
+}
+
+table tbody tr.group-row:hover {
+  @apply bg-slate-200 dark:bg-slate-800 transition-colors duration-150;
+}
+
+/* Data row hover */
+table tbody tr.data-row:hover {
+  @apply bg-blue-50 dark:bg-blue-600/30 cursor-pointer transition-colors duration-150;
+}
+
+/* Selected row */
+table tbody tr.data-row.selected {
+  @apply bg-blue-100 dark:bg-blue-900/50;
+}
+
+table tbody tr.data-row.selected:hover {
+  @apply bg-blue-200 dark:bg-blue-900/70;
+}
+
+
+

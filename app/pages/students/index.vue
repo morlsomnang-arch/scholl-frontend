@@ -1,59 +1,55 @@
 <script setup lang="ts">
-import { h, resolveComponent, ref, computed, onMounted } from 'vue'
-import type { TableColumn } from '@nuxt/ui'
+import { ref, computed, onMounted, resolveComponent, watch } from 'vue'
 import { useStudent, type Student } from '~/composables/useStudent'
 import { useAuth } from '~/composables/useAuth'
 
+/* UI */
 const UButton = resolveComponent('UButton')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UInput = resolveComponent('UInput')
 const UModal = resolveComponent('UModal')
-const UTable = resolveComponent('UTable')
 const UPagination = resolveComponent('UPagination')
+const UFileUpload = resolveComponent('UFileUpload')
+const USkeleton = resolveComponent('USkeleton')
+const UProgress = resolveComponent('UProgress')
 
 definePageMeta({ layout: 'admin', middleware: 'auth' })
 
-const { user, hasPermission } = useAuth()
+/* Auth */
+const { hasPermission } = useAuth()
 const canCreate = computed(() => hasPermission('create_students'))
 const canEdit = computed(() => hasPermission('update_students'))
 const canDelete = computed(() => hasPermission('delete_students'))
 
+/* Student */
 const { getStudents, createStudent, updateStudent, deleteStudent } = useStudent()
 const students = ref<Student[]>([])
 const loading = ref(false)
+
+/* Progress bar */
+const progress = ref(0)
+
+/* Search */
 const searchQuery = ref('')
 
-/* ===== CRUD Modal ===== */
-const showModal = ref(false)
-const isEdit = ref(false)
-const currentId = ref<number | null>(null)
-
-const nameKh = ref('')
-const nameEn = ref('')
-const dob = ref('')
-const phone = ref('')
-const gender = ref<'M' | 'F' | 'O'>('M')
-const image = ref<File | null>(null)
-
-/* ===== Checkbox Multi-Select ===== */
+/* Selection */
 const selectedStudents = ref<number[]>([])
-const toggleSelection = (id: number) => {
-  const index = selectedStudents.value.indexOf(id)
-  if (index === -1) selectedStudents.value.push(id)
-  else selectedStudents.value.splice(index, 1)
-}
 const isSelected = (id: number) => selectedStudents.value.includes(id)
-const toggleAllSelection = (checked: boolean) => {
+const toggleSelection = (id: number) => {
+  const i = selectedStudents.value.indexOf(id)
+  i === -1 ? selectedStudents.value.push(id) : selectedStudents.value.splice(i, 1)
+}
+const toggleAll = (checked: boolean) => {
   selectedStudents.value = checked ? paginatedData.value.map(s => s.id) : []
 }
+const currentPage = ref(1)
+const perPage = ref(35)
+const perPageOptions = [35, 100, 150, 200]
+const totalItems = computed(() => filteredData.value.length)
 
-/* ===== Fetch Students ===== */
-const fetchStudents = async () => {
-  loading.value = true
-  students.value = await getStudents()
-  loading.value = false
-}
-onMounted(fetchStudents)
+const paginatedData = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  return filteredData.value.slice(start, start + perPage.value)
+})
 const filteredData = computed(() => {
   if (!searchQuery.value) return students.value
   return students.value.filter(s =>
@@ -63,27 +59,30 @@ const filteredData = computed(() => {
   )
 })
 
-/* ===== Pagination ===== */
-const currentPage = ref(1)
-const perPage = ref(35)
-const perPageOptions = [35, 100, 150, 200, 250, 300]
-const changePerPage = (value: number) => {
-  perPage.value = value
-  currentPage.value = 1
-}
-const totalItems = computed(() => filteredData.value.length)
-const paginatedData = computed(() => {
-  const start = (currentPage.value - 1) * perPage.value
-  return filteredData.value.slice(start, start + perPage.value)
-})
+const fetchStudents = async () => {
+  loading.value = true
+  progress.value = 10
+  const timer = setInterval(() => {
+    if (progress.value < 90) progress.value += 10
+  }, 200)
 
-/* ===== File Change ===== */
-const onFileChange = (e: Event) => {
-  const files = (e.target as HTMLInputElement).files
-  image.value = files && files.length ? files[0] : null
+  students.value = await getStudents()
+  loading.value = false
+  progress.value = 100
+  clearInterval(timer)
 }
 
-/* ===== Reset Form ===== */
+/* Form */
+const showModal = ref(false)
+const isEdit = ref(false)
+const currentId = ref<number | null>(null)
+const nameKh = ref('')
+const nameEn = ref('')
+const dob = ref('')
+const phone = ref('')
+const gender = ref<'M' | 'F' | 'O'>('M')
+const image = ref<File | null>(null)
+
 const resetForm = () => {
   nameKh.value = ''
   nameEn.value = ''
@@ -96,7 +95,6 @@ const resetForm = () => {
   showModal.value = false
 }
 
-/* ===== Submit Form ===== */
 const submitForm = async () => {
   const form = new FormData()
   form.append('name_kh', nameKh.value)
@@ -106,17 +104,15 @@ const submitForm = async () => {
   form.append('gender', gender.value)
   if (image.value) form.append('image', image.value)
 
-  if (isEdit.value && currentId.value) {
+  if (isEdit.value && currentId.value)
     await updateStudent(currentId.value, form)
-  } else {
+  else
     await createStudent(form)
-  }
 
   await fetchStudents()
   resetForm()
 }
 
-/* ===== Edit & Delete ===== */
 const editStudent = (s: Student) => {
   isEdit.value = true
   currentId.value = s.id
@@ -128,149 +124,124 @@ const editStudent = (s: Student) => {
   showModal.value = true
 }
 
-const removeStudent = async (id: number) => {
-  if (confirm('តើអ្នកពិតជាចង់លុបសិស្សនេះមែនទេ?')) {
-    await deleteStudent(id)
-    await fetchStudents()
-  }
-}
-
-/* ===== Bulk Actions ===== */
 const bulkEdit = () => {
   if (selectedStudents.value.length === 1) {
-    const s = students.value.find(st => st.id === selectedStudents.value[0])
+    const s = students.value.find(i => i.id === selectedStudents.value[0])
     if (s) editStudent(s)
-  } else {
-    alert('សូមជ្រើសរើសសិស្សតែមួយសម្រាប់កែប្រែ')
-  }
+  } else alert('សូមជ្រើសសិស្សតែមួយ')
 }
 
 const bulkDelete = async () => {
-  if (selectedStudents.value.length === 0) return
-  if (confirm(`តើអ្នកពិតជាចង់លុប ${selectedStudents.value.length} សិស្សមែនទេ?`)) {
-    for (const id of selectedStudents.value) {
-      await deleteStudent(id)
-    }
-    selectedStudents.value = []
-    await fetchStudents()
-  }
+  if (!selectedStudents.value.length) return
+  if (!confirm(`លុប ${selectedStudents.value.length} សិស្ស?`)) return
+  for (const id of selectedStudents.value) await deleteStudent(id)
+  selectedStudents.value = []
+  await fetchStudents()
 }
 
-/* ===== Table Columns ===== */
-const columns: TableColumn<Student>[] = [
-  {
-    id: 'select',
-    header: h('input', {
-      type: 'checkbox',
-      class: 'w-4 h-4',
-      onChange: (e: Event) => toggleAllSelection((e.target as HTMLInputElement).checked),
-      checked: computed(() => paginatedData.value.every(s => selectedStudents.value.includes(s.id))).value
-    }),
-    cell: ({ row }) =>
-      h('input', {
-        type: 'checkbox',
-        class: 'w-4 h-4',
-        checked: isSelected(row.original.id),
-        onChange: () => toggleSelection(row.original.id)
-      })
-  },
-
-  {
-    id: 'image',
-    header: 'រូបភាព',
-    cell: ({ row }) =>
-      row.original.image
-        ? h('img', {
-          src: row.original.image, 
-          class: 'w-10 h-10 rounded object-cover mx-auto'
-        })
-        : '-'
-  }
-  ,
-
-  { accessorKey: 'name_kh', header: 'ឈ្មោះខ្មែរ' },
-  { accessorKey: 'name_en', header: 'ឈ្មោះអង់គ្លេស' },
-  { accessorKey: 'dob', header: 'ថ្ងៃកំណើត' },
-  { accessorKey: 'phone', header: 'ទូរស័ព្ទ' },
-  { accessorKey: 'gender', header: 'ភេទ' }
-]
+onMounted(fetchStudents)
 </script>
 
 <template>
   <div class="flex flex-col gap-4 font-battambang border dark:border-slate-700 p-3">
-    <div class="flex items-center justify-between border-b dark:border-slate-700 p-2 gap-3">
-      <div class="flex items-center gap-5 ">
-        <UButton v-if="canEdit" color="danger" @click="bulkEdit" icon="i-lucide-edit-2"
-          :disabled="selectedStudents.length === 0">
 
-        </UButton>
-
-        <!-- Bulk Delete -->
-        <UButton v-if="canDelete" color="danger" @click="bulkDelete" icon="i-lucide-trash-2"
-          :disabled="selectedStudents.length === 0">
-
-        </UButton>
-
-        <!-- Create Student -->
-        <UButton v-if="canCreate" color="danger" @click="showModal = true" icon="i-lucide-plus">
-
-        </UButton>
+    <!-- Toolbar -->
+    <div class="flex justify-between border-b dark:border-slate-700 p-2">
+      <div class="flex gap-3">
+        <UButton v-if="canEdit" color="danger" icon="i-lucide-edit" @click="bulkEdit"
+          :disabled="selectedStudents.length !== 1" />
+        <UButton v-if="canDelete" color="danger" icon="i-lucide-trash-2" @click="bulkDelete"
+          :disabled="selectedStudents.length === 0" />
+        <UButton v-if="canCreate" color="danger" icon="i-lucide-plus" @click="showModal = true" />
       </div>
-
-
-      <UInput v-model="searchQuery" icon="i-heroicons-magnifying-glass" placeholder="ស្វែងរកឈ្មោះ ឬ ទូរស័ព្ទ..."
-        class="max-w-xs" />
+      <UInput v-model="searchQuery" loading loading-icon="i-lucide-loader" color="neutral" placeholder="ស្វែងរកសិស្ស..."
+        class="max-w-xs custom-uinput" />
     </div>
 
-    <!-- Students Table -->
-    <UTable sticky :data="paginatedData" :columns="columns" class="max-h-115 overflow-auto border dark:border-slate-700"
-      :ui="{
-        thead: 'sticky top-0 bg-gray-100 dark:bg-slate-800 z-10 text-center',
-        th: 'px-4 py-3 text-sm  font-semibold',
-        td: 'px-4 py-3 text-sm border-b border-r  dark:border-slate-700',
-      }" />
+    <!-- 🔹 Progress Bar -->
+    <div v-if="loading" class="w-full mb-2 " size="xs" >
+      <UProgress color="error" v-model="progress" status striped rounded />
+    </div>
 
-    <!-- Pagination Controls + Total + Per Page -->
-    <div class="flex items-center justify-between mt-2">
-      <div class="font-battambang">សរុប: {{ totalItems }} សិស្ស</div>
+    <!-- TABLE -->
+    <div class="main-data">
+      <table>
+        <thead>
+          <tr>
+            <th class="border dark:border-slate-700 px-2 py-1 w-10">
+              <input type="checkbox" class="w-4 h-4" :checked="paginatedData.every(s => isSelected(s.id))"
+                @change="e => toggleAll((e.target as HTMLInputElement).checked)" />
+            </th>
+            <th>រូប</th>
+            <th>ឈ្មោះខ្មែរ</th>
+            <th>ឈ្មោះអង់គ្លេស</th>
+            <th>ថ្ងៃកំណើត</th>
+            <th class="w-20">ភេទ</th>
+          </tr>
+        </thead>
 
-      <div class="flex items-center gap-2">
-        <label class="font-battambang">បង្ហាញ:</label>
-        <select v-model.number="perPage" @change="changePerPage(perPage)" class="border rounded py-1 px-2">
-          <option v-for="opt in perPageOptions" :key="opt" :value="opt">{{ opt }}</option>
+        <tbody>
+          <tr v-if="loading" v-for="i in 5" :key="'skeleton-'+i">
+            <td><USkeleton class="h-4 w-4 mx-auto rounded-full" /></td>
+            <td><USkeleton class="h-16 w-16 rounded" /></td>
+            <td colspan="4"><USkeleton class="h-4 w-full" /></td>
+          </tr>
+
+          <tr v-for="s in paginatedData" :key="s.id" class="data-row" :class="{ selected: isSelected(s.id) }" v-else>
+            <td class="px-2 py-1 text-center">
+              <input type="checkbox" class="w-4 h-4" :checked="isSelected(s.id)" @change="toggleSelection(s.id)" />
+            </td>
+            <td>
+              <img :src="s.image_thumb || '/image.png'" class="w-16 h-16 object-cover mx-auto" />
+            </td>
+            <td>{{ s.name_kh }}</td>
+            <td>{{ s.name_en }}</td>
+            <td>{{ s.dob }}</td>
+            <td>{{ s.gender }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-between mt-2">
+      <div class="flex gap-2">
+        <select v-model.number="perPage" class="border px-2 py-1 rounded">
+          <option v-for="p in perPageOptions" :key="p" :value="p">{{ p }}</option>
         </select>
-
         <UPagination v-model:page="currentPage" :total="totalItems" :page-size="perPage" active-color="neutral" />
       </div>
+      <div>សរុប: {{ totalItems }} សិស្ស</div>
     </div>
 
-    <!-- Student Modal -->
+    <!-- MODAL -->
     <UModal v-model:open="showModal">
       <template #header>
-        <h3 class="text-lg font-semibold font-battambang">{{ isEdit ? 'កែប្រែសិស្ស' : 'បង្កើតសិស្សថ្មី' }}</h3>
+        <h3>{{ isEdit ? 'កែប្រែសិស្ស' : 'បង្កើតសិស្សថ្មី' }}</h3>
       </template>
 
       <template #body>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 font-battambang">
+        <div class="flex flex-col gap-3">
           <UInput v-model="nameKh" placeholder="ឈ្មោះខ្មែរ" />
           <UInput v-model="nameEn" placeholder="ឈ្មោះអង់គ្លេស" />
-          <UInput v-model="dob" type="date" placeholder="ថ្ងៃកំណើត" />
+          <UInput v-model="dob" type="date" />
           <UInput v-model="phone" placeholder="លេខទូរស័ព្ទ" />
-          <select v-model="gender" class="border rounded px-2 py-1">
+          <select v-model="gender" class="border px-2 py-1 rounded">
             <option value="M">ប្រុស</option>
             <option value="F">ស្រី</option>
             <option value="O">ផ្សេងៗ</option>
           </select>
-          <input type="file" @change="onFileChange" />
+          <UFileUpload accept="image/*" @update:model-value="f => image = f ?? null" />
         </div>
       </template>
 
       <template #footer>
-        <div class="flex justify-end gap-2 font-battambang">
-          <UButton color="gray" variant="soft" @click="resetForm">បោះបង់</UButton>
-          <UButton color="success" @click="submitForm">{{ isEdit ? 'កែប្រែ' : 'រក្សាទុក' }}</UButton>
-        </div>
+        <UButton variant="soft" @click="resetForm">បោះបង់</UButton>
+        <UButton color="success" @click="submitForm">
+          {{ isEdit ? 'កែប្រែ' : 'រក្សាទុក' }}
+        </UButton>
       </template>
     </UModal>
+
   </div>
 </template>

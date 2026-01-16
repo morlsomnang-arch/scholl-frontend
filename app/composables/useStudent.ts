@@ -1,100 +1,48 @@
-import { ref } from 'vue'
-import { useRuntimeConfig } from '#imports'
-import axios from 'axios'
-import { useAuth } from '~/composables/useAuth'
+import { ref } from 'vue';
+import axios from 'axios';
+import { useRuntimeConfig } from '#imports';
 
 export type Student = {
-  id: number
-  name_kh: string
-  name_en: string
-  dob: string
-  phone: string
-  gender: 'M' | 'F' | 'O'
-  image?: string
-
-  services?: Array<{
-    id?: number
-    class_classtype_id: number
-    academy_year_id: number
-    remark?: string
-  }>
-  parents?: Array<{
-    id?: number
-    name_kh: string
-    name_en?: string
-    gender: 'M' | 'F' | 'O'
-    type_parent_id: number
-    phone?: string
-    occupation?: string
-  }>
-  addresses?: Array<{
-    id?: number
-    address_type: 'birth' | 'current'
-    province_id: number
-    district_id: number
-    commune_id: number
-    village_id: number
-  }>
-}
+  id: number;
+  name_kh: string;
+  name_en: string;
+  dob: string;
+  phone: string;
+  gender: 'M' | 'F' | 'O';
+  image?: string;
+  image_url?: string;
+  image_thumb?: string;
+};
 
 export const useStudent = () => {
-  const students = ref<Student[]>([])
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase
-  const { token } = useAuth()
+  const students = ref<Student[]>([]);
+  const config = useRuntimeConfig();
+  const apiBase = config.public.apiBase;
 
-  const axiosInstance = axios.create({
-    baseURL: apiBase,
-    headers: { Authorization: `Bearer ${token.value}` }
-  })
+  const getStudents = async () => {
+    const res = await axios.get(`${apiBase}/students`);
+    students.value = res.data.map((s: Student) => ({
+      ...s,
+      image_thumb: s.image ? `${apiBase}/uploads/students/${s.image}?t=${Date.now()}` : null,
 
-  const getStudents = async (): Promise<Student[]> => {
-    try {
-      const res = await axiosInstance.get('/students')
-      students.value = res.data
-      return students.value
-    } catch (err) {
-      console.error('Failed to fetch students:', err)
-      return []
-    }
-  }
-
-  const getStudent = async (id: number): Promise<Student> => {
-    try {
-      const res = await axiosInstance.get(`/students/${id}`)
-      return res.data
-    } catch (err) {
-      console.error('Failed to get student:', err)
-      throw err
-    }
-  }
+      image_url: s.image
+        ? `${apiBase}/uploads/students/${s.image}`
+        : null
+    }));
+    return students.value;
+  };
 
   const createStudent = async (form: FormData) => {
-    try {
-      await axiosInstance.post('/students', form, { headers: { 'Content-Type': 'multipart/form-data' } })
-    } catch (err) {
-      console.error('Failed to create student:', err)
-      throw err
-    }
-  }
+    await axios.post(`${apiBase}/students`, form, { headers: { 'Content-Type': 'multipart/form-data' } });
+  };
 
   const updateStudent = async (id: number, form: FormData) => {
-    try {
-      await axiosInstance.put(`/students/${id}`, form, { headers: { 'Content-Type': 'multipart/form-data' } })
-    } catch (err) {
-      console.error('Failed to update student:', err)
-      throw err
-    }
-  }
+    await axios.put(`${apiBase}/students/${id}`, form, { headers: { 'Content-Type': 'multipart/form-data' } });
+  };
 
   const deleteStudent = async (id: number) => {
-    try {
-      await axiosInstance.delete(`/students/${id}`)
-    } catch (err) {
-      console.error('Failed to delete student:', err)
-      throw err
-    }
-  }
+    await axios.delete(`${apiBase}/students/${id}`);
+  };
 
-  return { students, getStudents, getStudent, createStudent, updateStudent, deleteStudent }
-}
+  return { students, getStudents, createStudent, updateStudent, deleteStudent };
+};
